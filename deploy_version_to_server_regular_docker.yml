@@ -1,0 +1,33 @@
+name: Deploy on Tag with Image Retention (Self-Hosted Runner)
+
+on:
+  push:
+    tags:
+      - '[0-9]*.[0-9]*' # Matches tags like 0.1, 1.2, etc.
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy application
+        run: |
+          IMAGE_NAME=test-react-img
+          CONTAINER_NAME=test-react-container
+          
+          # Stop and remove the old container
+          docker ps -a -q --filter "name=$CONTAINER_NAME" | xargs -r docker rm -f
+
+          # Remove older images beyond the retention limit (keep 3 older + current)
+          docker images $IMAGE_NAME --format "{{.Repository}}:{{.Tag}} {{.CreatedAt}}" | \
+          sort -rk 2 | \
+          awk 'NR>3 {print $1}' | xargs -r docker rmi -f || echo "No old images to remove"
+
+          # Build the new image
+          docker build -t $IMAGE_NAME:${GITHUB_REF_NAME} .
+
+          # Start the new container
+          docker run -d --name $CONTAINER_NAME -p 82:82 $IMAGE_NAME:${GITHUB_REF_NAME}

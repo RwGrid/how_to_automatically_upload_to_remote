@@ -1,0 +1,12 @@
+version: '3'
+services:
+  react-ui:
+    container_name: react-ui
+    build:
+      context: .
+      args:
+        IMAGE_TAG: ${TAG} # Dynamically passed from GitHub Actions
+    image: react_test:${TAG} # Set the dynamic tag for the image
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
