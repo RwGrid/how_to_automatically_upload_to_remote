@@ -135,12 +135,18 @@ NOW, it will run on machine boot, so it is always running
     machine, so its kinda gateway,in ssh, u need to include the -P
     command or other way , search for it
 
-# How to perform docker compose delete container and image and create new one when the commit contains word 'minor' or word 'major' release
+# How to perform docker compose delete container and image and create new one when a new release is perform using git tag/release
+----------------------------
+1-must make docker non sudo
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
+sudo systemctl restart docker
+restart ubuntu remote machine
 
-I found another way, which is to use the tag clause, which is used to
-create a release in GitHub, so if u use tag in your code and then push
-the tag to GitHub, it will add a release to the releases page with the
-version u defined as name, for example xxx_1.3
+this is needed to not encounter sock error 
+sudo chmod 666 /var/run/docker.sock
+--------------------------------
 
 name: Deploy on Tag with Image Retention (Self-Hosted Runner)
 
